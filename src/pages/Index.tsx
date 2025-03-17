@@ -9,14 +9,27 @@ import TripItinerary from "@/components/TripItinerary";
 const Index = () => {
   const [itinerary, setItinerary] = useState<TravelItinerary | null>(null);
   const [showItinerary, setShowItinerary] = useState(false);
+  const [globeTransitioning, setGlobeTransitioning] = useState(false);
 
   const handleItineraryGenerated = (newItinerary: TravelItinerary) => {
     setItinerary(newItinerary);
-    setShowItinerary(true);
+    setGlobeTransitioning(true);
+    
+    // Start transition animation
+    setTimeout(() => {
+      setShowItinerary(true);
+      setGlobeTransitioning(false);
+    }, 1000);
   };
 
   const handleBackToChat = () => {
-    setShowItinerary(false);
+    setGlobeTransitioning(true);
+    
+    // Start transition animation back to globe
+    setTimeout(() => {
+      setShowItinerary(false);
+      setGlobeTransitioning(false);
+    }, 1000);
   };
 
   return (
@@ -38,7 +51,17 @@ const Index = () => {
         <main className="flex-1 relative flex items-center justify-center">
           {/* Globe component - positioned in the background */}
           <div className="absolute inset-0 flex items-center justify-center z-0">
-            <Globe />
+            <motion.div
+              initial={false}
+              animate={{
+                scale: globeTransitioning ? (showItinerary ? 1.5 : 0.8) : 1,
+                opacity: globeTransitioning ? 0.5 : 1,
+              }}
+              transition={{ duration: 1, ease: "easeInOut" }}
+              className="w-full h-full flex items-center justify-center"
+            >
+              <Globe />
+            </motion.div>
             <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent z-10 pointer-events-none"></div>
           </div>
           

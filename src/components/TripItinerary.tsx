@@ -4,7 +4,9 @@ import { TravelItinerary } from "@/types";
 import { WorldMap } from "@/components/ui/world-map";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Map } from "lucide-react";
+import MapboxMap from "@/components/MapboxMap";
+import { useState } from "react";
 
 interface TripItineraryProps {
   itinerary: TravelItinerary;
@@ -12,6 +14,8 @@ interface TripItineraryProps {
 }
 
 export default function TripItinerary({ itinerary, onBack }: TripItineraryProps) {
+  const [mapView, setMapView] = useState<"simple" | "mapbox">("simple");
+  
   // Create connections between consecutive destinations
   const connections = itinerary.destinations.slice(0, -1).map((start, i) => {
     const end = itinerary.destinations[i + 1];
@@ -29,27 +33,46 @@ export default function TripItinerary({ itinerary, onBack }: TripItineraryProps)
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <div className="flex items-center">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onBack}
-          className="mr-2"
-        >
-          <ArrowLeft size={18} />
-        </Button>
-        <div>
-          <h1 className="text-2xl font-medium">{itinerary.title}</h1>
-          <p className="text-sm text-muted-foreground">{itinerary.subtitle}</p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onBack}
+            className="mr-2"
+          >
+            <ArrowLeft size={18} />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-medium">{itinerary.title}</h1>
+            <p className="text-sm text-muted-foreground">{itinerary.subtitle}</p>
+          </div>
         </div>
+        
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setMapView(mapView === "simple" ? "mapbox" : "simple")}
+          className="flex items-center gap-1"
+        >
+          <Map size={14} />
+          {mapView === "simple" ? "Detailed Map" : "Simple Map"}
+        </Button>
       </div>
       
       <div className="flex-1 flex flex-col space-y-6">
         <Card className="p-4 h-[250px] shadow-sm border border-border/50 relative overflow-hidden">
-          <WorldMap 
-            dots={connections}
-            lineColor="#0284c7"
-          />
+          {mapView === "simple" ? (
+            <WorldMap 
+              dots={connections}
+              lineColor="#0284c7"
+            />
+          ) : (
+            <MapboxMap 
+              destinations={itinerary.destinations} 
+              animateIn={true}
+            />
+          )}
         </Card>
         
         <p className="text-sm text-muted-foreground px-1">{itinerary.summary}</p>
@@ -67,7 +90,12 @@ export default function TripItinerary({ itinerary, onBack }: TripItineraryProps)
                 className="p-4"
               >
                 <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-medium">{destination.name}</h3>
+                  <h3 className="font-medium">
+                    <span className="inline-block w-5 h-5 bg-primary/10 text-primary rounded-full text-xs flex items-center justify-center mr-1.5">
+                      {index + 1}
+                    </span>
+                    {destination.name}
+                  </h3>
                   <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
                     {destination.days} {destination.days === 1 ? 'day' : 'days'}
                   </span>
