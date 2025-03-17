@@ -12,28 +12,6 @@ interface ChatBubbleProps {
 export default function ChatBubble({ message, index, totalMessages }: ChatBubbleProps) {
   const isUser = message.role === "user";
   
-  // Calculate position around the globe based on message index and total count
-  // Newer messages are in the center, older messages move around the globe
-  const getPositionClass = () => {
-    if (index === totalMessages - 1) {
-      return "justify-center"; // Latest message centered
-    }
-    
-    // For older messages, distribute them in a circular pattern around the globe
-    const olderMessagePosition = index % 8;
-    switch(olderMessagePosition) {
-      case 0: return "justify-start items-center"; // Left
-      case 1: return "justify-end items-center"; // Right
-      case 2: return "justify-center items-start ml-16"; // Left of center
-      case 3: return "justify-center items-start mr-16"; // Right of center
-      case 4: return "justify-center items-end mt-16"; // Top
-      case 5: return "justify-center items-end mb-16"; // Bottom
-      case 6: return "justify-center items-start ml-28"; // Far left
-      case 7: return "justify-center items-start mr-28"; // Far right
-      default: return "justify-center";
-    }
-  };
-  
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -44,8 +22,8 @@ export default function ChatBubble({ message, index, totalMessages }: ChatBubble
         ease: [0.22, 1, 0.36, 1]
       }}
       className={cn(
-        "flex w-full max-w-md px-4",
-        getPositionClass()
+        "flex w-full max-w-md mx-auto px-4",
+        isUser ? "justify-end" : "justify-start"
       )}
     >
       <div
