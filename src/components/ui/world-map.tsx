@@ -1,8 +1,6 @@
 
 import { useRef } from "react";
 import { motion } from "framer-motion";
-import DottedMap from "dotted-map";
-import { useTheme } from "@/hooks/use-theme";
 
 interface MapProps {
   dots?: Array<{
@@ -17,17 +15,6 @@ export function WorldMap({
   lineColor = "#0ea5e9",
 }: MapProps) {
   const svgRef = useRef<SVGSVGElement>(null);
-  const map = new DottedMap({ height: 100, grid: "diagonal" });
-
-  // Simple theme detection - could be expanded with a proper useTheme hook
-  const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-  const svgMap = map.getSVG({
-    radius: 0.22,
-    color: isDarkMode ? "#FFFFFF40" : "#00000040",
-    shape: "circle",
-    backgroundColor: isDarkMode ? "black" : "white",
-  });
 
   const projectPoint = (lat: number, lng: number) => {
     const x = (lng + 180) * (800 / 360);
@@ -45,17 +32,62 @@ export function WorldMap({
   };
 
   return (
-    <div className="w-full h-full aspect-[2/1] bg-white dark:bg-black rounded-lg relative font-sans">
-      <div
-        dangerouslySetInnerHTML={{ __html: svgMap }}
-        className="h-full w-full [mask-image:linear-gradient(to_bottom,transparent,white_10%,white_90%,transparent)] pointer-events-none select-none"
-      />
-      
+    <div className="w-full h-full relative">
       <svg
         ref={svgRef}
         viewBox="0 0 800 400"
         className="w-full h-full absolute inset-0 pointer-events-none select-none"
       >
+        <defs>
+          <pattern
+            id="grid"
+            width="20"
+            height="20"
+            patternUnits="userSpaceOnUse"
+          >
+            <circle cx="10" cy="10" r="0.5" fill="#00000010" />
+          </pattern>
+          <linearGradient id="path-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="white" stopOpacity="0" />
+            <stop offset="5%" stopColor={lineColor} stopOpacity="1" />
+            <stop offset="95%" stopColor={lineColor} stopOpacity="1" />
+            <stop offset="100%" stopColor="white" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <rect width="800" height="400" fill="url(#grid)" />
+        
+        {/* World map outlines - simplified version */}
+        <path
+          d="M135,120 L180,120 L195,145 L250,140 L280,110 L330,90 L355,95 L370,80 L385,85 L400,70 L420,80 L440,75 L465,95 L480,90 L505,105 L540,90 L560,105 L580,100 L600,115 L620,110 L640,125 L135,125 Z"
+          fill="rgba(200,215,235,0.2)"
+          stroke="rgba(100,120,150,0.3)"
+          strokeWidth="0.5"
+        />
+        <path
+          d="M200,230 L220,220 L250,235 L220,260 L200,230 Z"
+          fill="rgba(200,215,235,0.2)"
+          stroke="rgba(100,120,150,0.3)"
+          strokeWidth="0.5"
+        />
+        <path
+          d="M300,200 L320,190 L345,195 L370,180 L400,190 L420,180 L450,195 L430,215 L410,210 L380,225 L340,220 L320,210 L300,200 Z"
+          fill="rgba(200,215,235,0.2)"
+          stroke="rgba(100,120,150,0.3)"
+          strokeWidth="0.5"
+        />
+        <path
+          d="M500,175 L520,170 L550,180 L570,170 L590,180 L580,200 L560,195 L530,205 L510,195 L500,175 Z"
+          fill="rgba(200,215,235,0.2)"
+          stroke="rgba(100,120,150,0.3)"
+          strokeWidth="0.5"
+        />
+        <path
+          d="M600,220 L620,210 L650,220 L640,240 L610,235 L600,220 Z"
+          fill="rgba(200,215,235,0.2)"
+          stroke="rgba(100,120,150,0.3)"
+          strokeWidth="0.5"
+        />
+
         {dots.map((dot, i) => {
           const startPoint = projectPoint(dot.start.lat, dot.start.lng);
           const endPoint = projectPoint(dot.end.lat, dot.end.lng);
@@ -82,15 +114,6 @@ export function WorldMap({
             </g>
           );
         })}
-
-        <defs>
-          <linearGradient id="path-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="white" stopOpacity="0" />
-            <stop offset="5%" stopColor={lineColor} stopOpacity="1" />
-            <stop offset="95%" stopColor={lineColor} stopOpacity="1" />
-            <stop offset="100%" stopColor="white" stopOpacity="0" />
-          </linearGradient>
-        </defs>
 
         {dots.map((dot, i) => (
           <g key={`points-group-${i}`}>

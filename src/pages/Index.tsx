@@ -9,14 +9,33 @@ import TripItinerary from "@/components/TripItinerary";
 const Index = () => {
   const [itinerary, setItinerary] = useState<TravelItinerary | null>(null);
   const [showItinerary, setShowItinerary] = useState(false);
+  const [globeTransitioning, setGlobeTransitioning] = useState(false);
 
   const handleItineraryGenerated = (newItinerary: TravelItinerary) => {
     setItinerary(newItinerary);
-    setShowItinerary(true);
+    setGlobeTransitioning(true);
+    
+    // Start transition animation with a zoom effect
+    setTimeout(() => {
+      setShowItinerary(true);
+      // Give time for the animation to complete before resetting state
+      setTimeout(() => {
+        setGlobeTransitioning(false);
+      }, 1000);
+    }, 1000);
   };
 
   const handleBackToChat = () => {
-    setShowItinerary(false);
+    setGlobeTransitioning(true);
+    
+    // Start transition animation back to globe view
+    setTimeout(() => {
+      setShowItinerary(false);
+      // Give time for the animation to complete before resetting state
+      setTimeout(() => {
+        setGlobeTransitioning(false);
+      }, 1000);
+    }, 1000);
   };
 
   return (
@@ -37,10 +56,24 @@ const Index = () => {
         
         <main className="flex-1 relative flex items-center justify-center">
           {/* Globe component - positioned in the background */}
-          <div className="absolute inset-0 flex items-center justify-center z-0">
-            <Globe />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent z-10 pointer-events-none"></div>
-          </div>
+          <AnimatePresence>
+            {!showItinerary && (
+              <motion.div 
+                key="globe"
+                className="absolute inset-0 flex items-center justify-center z-0"
+                initial={false}
+                animate={{
+                  scale: globeTransitioning ? 2 : 1,
+                  opacity: globeTransitioning ? 0 : 1,
+                }}
+                exit={{ scale: 2, opacity: 0 }}
+                transition={{ duration: 1.5, ease: "easeInOut" }}
+              >
+                <Globe />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent z-10 pointer-events-none"></div>
+              </motion.div>
+            )}
+          </AnimatePresence>
           
           {/* Content overlay */}
           <div className="relative z-20 w-full h-full max-w-2xl mx-auto">
@@ -48,10 +81,10 @@ const Index = () => {
               {showItinerary ? (
                 <motion.div
                   key="itinerary"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  transition={{ duration: 0.4 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.4, delay: 0.5 }}
                   className="h-full"
                 >
                   {itinerary && (
@@ -68,9 +101,11 @@ const Index = () => {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.4 }}
-                  className="h-full"
+                  className="h-full flex items-center justify-center"
                 >
-                  <TravelChat onItineraryGenerated={handleItineraryGenerated} />
+                  <div className="w-full max-w-md">
+                    <TravelChat onItineraryGenerated={handleItineraryGenerated} />
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
