@@ -28,7 +28,7 @@ const Index = () => {
   const handleBackToChat = () => {
     setGlobeTransitioning(true);
     
-    // Start transition animation back to globe with reverse zoom effect
+    // Start transition animation back to globe view
     setTimeout(() => {
       setShowItinerary(false);
       // Give time for the animation to complete before resetting state
@@ -56,25 +56,24 @@ const Index = () => {
         
         <main className="flex-1 relative flex items-center justify-center">
           {/* Globe component - positioned in the background */}
-          <div className="absolute inset-0 flex items-center justify-center z-0">
-            <motion.div
-              initial={false}
-              animate={{
-                scale: globeTransitioning ? (showItinerary ? 2 : 0.7) : 1,
-                opacity: globeTransitioning ? 0.3 : 1,
-                y: globeTransitioning && showItinerary ? -50 : 0,
-              }}
-              transition={{ 
-                duration: 1.5, 
-                ease: "easeInOut",
-                scale: { type: "spring", stiffness: 100 }
-              }}
-              className="w-full h-full flex items-center justify-center"
-            >
-              <Globe />
-            </motion.div>
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent z-10 pointer-events-none"></div>
-          </div>
+          <AnimatePresence>
+            {!showItinerary && (
+              <motion.div 
+                key="globe"
+                className="absolute inset-0 flex items-center justify-center z-0"
+                initial={false}
+                animate={{
+                  scale: globeTransitioning ? 2 : 1,
+                  opacity: globeTransitioning ? 0 : 1,
+                }}
+                exit={{ scale: 2, opacity: 0 }}
+                transition={{ duration: 1.5, ease: "easeInOut" }}
+              >
+                <Globe />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent z-10 pointer-events-none"></div>
+              </motion.div>
+            )}
+          </AnimatePresence>
           
           {/* Content overlay */}
           <div className="relative z-20 w-full h-full max-w-2xl mx-auto">
@@ -82,13 +81,10 @@ const Index = () => {
               {showItinerary ? (
                 <motion.div
                   key="itinerary"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  transition={{ 
-                    duration: 0.4,
-                    delay: 0.5 // Give time for the globe animation to start
-                  }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.4, delay: 0.5 }}
                   className="h-full"
                 >
                   {itinerary && (

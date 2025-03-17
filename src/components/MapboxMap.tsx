@@ -10,6 +10,9 @@ interface MapboxMapProps {
   selectedDestination?: number;
 }
 
+// Set the Mapbox token directly
+mapboxgl.accessToken = "pk.eyJ1IjoiZ2VuamVzcyIsImEiOiJjbTZsc2FwemYwYmo4MmtweW8ybHpyYnpkIn0.rtyPr333XpXs9etZcWM3Qg";
+
 export default function MapboxMap({ 
   destinations, 
   animateIn = false,
@@ -17,16 +20,14 @@ export default function MapboxMap({
 }: MapboxMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const [mapboxToken, setMapboxToken] = useState<string>("");
   const markers = useRef<mapboxgl.Marker[]>([]);
+  const [mapReady, setMapReady] = useState(false);
 
   useEffect(() => {
     if (!mapContainer.current) return;
     
     // Initialize Mapbox map
-    if (mapboxToken && !map.current) {
-      mapboxgl.accessToken = mapboxToken;
-      
+    if (!map.current) {
       const bounds = new mapboxgl.LngLatBounds();
       destinations.forEach(destination => {
         bounds.extend([destination.lng, destination.lat]);
@@ -48,6 +49,7 @@ export default function MapboxMap({
       // Wait for map to load
       map.current.on("load", () => {
         if (!map.current) return;
+        setMapReady(true);
         
         // Add markers for each destination
         destinations.forEach((destination, index) => {
@@ -129,17 +131,20 @@ export default function MapboxMap({
         
         // Add fly animation if requested
         if (animateIn && destinations.length > 0) {
-          // First flyTo the first destination
+          // Fly to the first destination
           setTimeout(() => {
             map.current?.flyTo({
               center: [destinations[0].lng, destinations[0].lat],
               zoom: 11,
-              pitch: 45,
+              pitch: 60,
               bearing: 30,
               duration: 3000,
-              easing: (t) => t
+              essential: true
             });
           }, 1000);
+        } else if (destinations.length > 0) {
+          // Fly to the selected destination
+          flyToDestination(selectedDestination);
         }
       });
     }
@@ -149,58 +154,39 @@ export default function MapboxMap({
       map.current?.remove();
       map.current = null;
     };
-  }, [destinations, mapboxToken, animateIn]);
+  }, [destinations, animateIn]);
 
-  // Effect for handling selected destination changes
-  useEffect(() => {
-    if (!map.current || !mapboxToken) return;
+  // Function to fly to a specific destination
+  const flyToDestination = (index: number) => {
+    if (!map.current || !mapReady) return;
     
-    // Fly to the selected destination with animation
-    const destination = destinations[selectedDestination];
+    const destination = destinations[index];
     if (destination) {
       // Open the popup for the selected marker
-      if (markers.current[selectedDestination]) {
-        markers.current[selectedDestination].togglePopup();
+      if (markers.current[index]) {
+        markers.current[index].togglePopup();
       }
       
       // Fly to the selected destination
       map.current.flyTo({
         center: [destination.lng, destination.lat],
-        zoom: 12,
+        zoom: 13,
         pitch: 60,
         bearing: Math.random() * 60 - 30, // Random bearing between -30 and 30 degrees
         duration: 2000,
         essential: true
       });
     }
-  }, [selectedDestination, destinations, mapboxToken]);
+  };
+
+  // Effect for handling selected destination changes
+  useEffect(() => {
+    flyToDestination(selectedDestination);
+  }, [selectedDestination, mapReady]);
 
   return (
-    <div className="w-full h-full flex flex-col">
-      {!mapboxToken ? (
-        <div className="flex flex-1 items-center justify-center p-4">
-          <div className="bg-background/80 p-4 rounded-lg shadow-md max-w-md w-full">
-            <h3 className="font-medium mb-2">Enter your Mapbox token</h3>
-            <p className="text-sm text-muted-foreground mb-3">
-              To see the map, please enter your Mapbox public token
-            </p>
-            <input 
-              type="text" 
-              placeholder="pk.eyJ1Ijoie3VzZXJuYW1lfSI..." 
-              className="w-full p-2 border rounded-md mb-2"
-              value={mapboxToken}
-              onChange={(e) => setMapboxToken(e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              Get your free token at <a href="https://mapbox.com" target="_blank" rel="noreferrer" className="text-primary">mapbox.com</a>
-            </p>
-          </div>
-        </div>
-      ) : (
-        <div className="relative flex-1">
-          <div ref={mapContainer} className="absolute inset-0 rounded-lg" />
-        </div>
-      )}
+    <div className="w-full h-full relative">
+      <div ref={mapContainer} className="absolute inset-0 rounded-lg" />
     </div>
   );
 }

@@ -22,14 +22,14 @@ export default function ChatBubble({ message, index, totalMessages }: ChatBubble
     // For older messages, distribute them in a circular pattern around the globe
     const olderMessagePosition = index % 8;
     switch(olderMessagePosition) {
-      case 0: return "justify-start"; // Left
-      case 1: return "justify-end"; // Right
-      case 2: return "justify-center ml-28"; // Left of center
-      case 3: return "justify-center mr-28"; // Right of center
-      case 4: return "justify-center mt-12 ml-12"; // Top left
-      case 5: return "justify-center mt-12 mr-12"; // Top right
-      case 6: return "justify-center mb-12 ml-12"; // Bottom left
-      case 7: return "justify-center mb-12 mr-12"; // Bottom right
+      case 0: return "justify-start items-center"; // Left
+      case 1: return "justify-end items-center"; // Right
+      case 2: return "justify-center items-start ml-16"; // Left of center
+      case 3: return "justify-center items-start mr-16"; // Right of center
+      case 4: return "justify-center items-end mt-16"; // Top
+      case 5: return "justify-center items-end mb-16"; // Bottom
+      case 6: return "justify-center items-start ml-28"; // Far left
+      case 7: return "justify-center items-start mr-28"; // Far right
       default: return "justify-center";
     }
   };
@@ -61,7 +61,7 @@ export default function ChatBubble({ message, index, totalMessages }: ChatBubble
           animationDuration: "3s"
         }}
       >
-        <p className="text-balance">{message.content}</p>
+        <p className="text-balance whitespace-normal break-words">{message.content}</p>
       </div>
     </motion.div>
   );

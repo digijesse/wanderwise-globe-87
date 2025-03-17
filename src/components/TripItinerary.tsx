@@ -1,7 +1,6 @@
 
 import { motion } from "framer-motion";
 import { TravelItinerary } from "@/types";
-import { WorldMap } from "@/components/ui/world-map";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Map } from "lucide-react";
@@ -21,18 +20,8 @@ interface TripItineraryProps {
 }
 
 export default function TripItinerary({ itinerary, onBack }: TripItineraryProps) {
-  const [mapView, setMapView] = useState<"simple" | "mapbox">("simple");
   const [selectedDestination, setSelectedDestination] = useState(0);
   
-  // Create connections between consecutive destinations
-  const connections = itinerary.destinations.slice(0, -1).map((start, i) => {
-    const end = itinerary.destinations[i + 1];
-    return {
-      start: { lat: start.lat, lng: start.lng, label: start.name },
-      end: { lat: end.lat, lng: end.lng, label: end.name },
-    };
-  });
-
   const handleDestinationSelect = (index: number) => {
     setSelectedDestination(index);
   };
@@ -60,32 +49,15 @@ export default function TripItinerary({ itinerary, onBack }: TripItineraryProps)
             <p className="text-sm text-muted-foreground">{itinerary.subtitle}</p>
           </div>
         </div>
-        
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setMapView(mapView === "simple" ? "mapbox" : "simple")}
-          className="flex items-center gap-1"
-        >
-          <Map size={14} />
-          {mapView === "simple" ? "Detailed Map" : "Simple Map"}
-        </Button>
       </div>
       
       <div className="flex-1 flex flex-col space-y-6">
         <Card className="p-4 h-[250px] shadow-sm border border-border/50 relative overflow-hidden">
-          {mapView === "simple" ? (
-            <WorldMap 
-              dots={connections}
-              lineColor="#0284c7"
-            />
-          ) : (
-            <MapboxMap 
-              destinations={itinerary.destinations} 
-              animateIn={true}
-              selectedDestination={selectedDestination}
-            />
-          )}
+          <MapboxMap 
+            destinations={itinerary.destinations} 
+            animateIn={true}
+            selectedDestination={selectedDestination}
+          />
         </Card>
         
         <p className="text-sm text-muted-foreground px-1">{itinerary.summary}</p>
