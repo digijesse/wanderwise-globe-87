@@ -6,9 +6,10 @@ import { motion } from "framer-motion";
 interface ChatBubbleProps {
   message: Message;
   index: number;
+  totalMessages: number;
 }
 
-export default function ChatBubble({ message, index }: ChatBubbleProps) {
+export default function ChatBubble({ message, index, totalMessages }: ChatBubbleProps) {
   const isUser = message.role === "user";
   
   return (
@@ -21,7 +22,7 @@ export default function ChatBubble({ message, index }: ChatBubbleProps) {
         ease: [0.22, 1, 0.36, 1]
       }}
       className={cn(
-        "flex w-full max-w-md",
+        "flex w-full max-w-md mx-auto px-4",
         isUser ? "justify-end" : "justify-start"
       )}
     >
@@ -38,7 +39,7 @@ export default function ChatBubble({ message, index }: ChatBubbleProps) {
           animationDuration: "3s"
         }}
       >
-        <p className="text-balance">{message.content}</p>
+        <p className="text-balance whitespace-normal break-words">{message.content}</p>
       </div>
     </motion.div>
   );
