@@ -15,20 +15,26 @@ const Index = () => {
     setItinerary(newItinerary);
     setGlobeTransitioning(true);
     
-    // Start transition animation
+    // Start transition animation with a zoom effect
     setTimeout(() => {
       setShowItinerary(true);
-      setGlobeTransitioning(false);
+      // Give time for the animation to complete before resetting state
+      setTimeout(() => {
+        setGlobeTransitioning(false);
+      }, 1000);
     }, 1000);
   };
 
   const handleBackToChat = () => {
     setGlobeTransitioning(true);
     
-    // Start transition animation back to globe
+    // Start transition animation back to globe with reverse zoom effect
     setTimeout(() => {
       setShowItinerary(false);
-      setGlobeTransitioning(false);
+      // Give time for the animation to complete before resetting state
+      setTimeout(() => {
+        setGlobeTransitioning(false);
+      }, 1000);
     }, 1000);
   };
 
@@ -54,10 +60,15 @@ const Index = () => {
             <motion.div
               initial={false}
               animate={{
-                scale: globeTransitioning ? (showItinerary ? 1.5 : 0.8) : 1,
-                opacity: globeTransitioning ? 0.5 : 1,
+                scale: globeTransitioning ? (showItinerary ? 2 : 0.7) : 1,
+                opacity: globeTransitioning ? 0.3 : 1,
+                y: globeTransitioning && showItinerary ? -50 : 0,
               }}
-              transition={{ duration: 1, ease: "easeInOut" }}
+              transition={{ 
+                duration: 1.5, 
+                ease: "easeInOut",
+                scale: { type: "spring", stiffness: 100 }
+              }}
               className="w-full h-full flex items-center justify-center"
             >
               <Globe />
@@ -74,7 +85,10 @@ const Index = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 20 }}
-                  transition={{ duration: 0.4 }}
+                  transition={{ 
+                    duration: 0.4,
+                    delay: 0.5 // Give time for the globe animation to start
+                  }}
                   className="h-full"
                 >
                   {itinerary && (
@@ -91,9 +105,11 @@ const Index = () => {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.4 }}
-                  className="h-full"
+                  className="h-full flex items-center justify-center"
                 >
-                  <TravelChat onItineraryGenerated={handleItineraryGenerated} />
+                  <div className="w-full max-w-md">
+                    <TravelChat onItineraryGenerated={handleItineraryGenerated} />
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>

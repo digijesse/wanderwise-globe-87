@@ -19,12 +19,17 @@ export default function ChatBubble({ message, index, totalMessages }: ChatBubble
       return "justify-center"; // Latest message centered
     }
     
-    const olderMessagePosition = index % 4;
+    // For older messages, distribute them in a circular pattern around the globe
+    const olderMessagePosition = index % 8;
     switch(olderMessagePosition) {
       case 0: return "justify-start"; // Left
       case 1: return "justify-end"; // Right
-      case 2: return "justify-center ml-20"; // Left of center
-      case 3: return "justify-center mr-20"; // Right of center
+      case 2: return "justify-center ml-28"; // Left of center
+      case 3: return "justify-center mr-28"; // Right of center
+      case 4: return "justify-center mt-12 ml-12"; // Top left
+      case 5: return "justify-center mt-12 mr-12"; // Top right
+      case 6: return "justify-center mb-12 ml-12"; // Bottom left
+      case 7: return "justify-center mb-12 mr-12"; // Bottom right
       default: return "justify-center";
     }
   };
