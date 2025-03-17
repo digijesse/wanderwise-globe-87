@@ -35,12 +35,13 @@ export default function MapboxMap({
       
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: "mapbox://styles/mapbox/light-v11",
+        style: "mapbox://styles/mapbox/dark-v11", // Using dark style for better 3D effect
         center: bounds.isEmpty() ? [0, 20] : bounds.getCenter(),
         zoom: 2,
-        pitch: animateIn ? 60 : 30,
+        pitch: 60, // Higher pitch for 3D view
         bearing: 0,
-        antialias: true
+        antialias: true,
+        terrain: { source: 'mapbox-dem', exaggeration: 1.5 } // Enable 3D terrain
       });
       
       // Add navigation controls
@@ -49,6 +50,26 @@ export default function MapboxMap({
       // Wait for map to load
       map.current.on("load", () => {
         if (!map.current) return;
+        
+        // Add terrain and sky layers for 3D effect
+        map.current.addSource('mapbox-dem', {
+          'type': 'raster-dem',
+          'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
+          'tileSize': 512,
+          'maxzoom': 14
+        });
+        
+        // Add sky layer
+        map.current.addLayer({
+          'id': 'sky',
+          'type': 'sky',
+          'paint': {
+            'sky-type': 'atmosphere',
+            'sky-atmosphere-sun': [0.0, 90.0],
+            'sky-atmosphere-sun-intensity': 15
+          }
+        });
+        
         setMapReady(true);
         
         // Add markers for each destination
@@ -136,7 +157,7 @@ export default function MapboxMap({
             map.current?.flyTo({
               center: [destinations[0].lng, destinations[0].lat],
               zoom: 11,
-              pitch: 60,
+              pitch: 75, // Even higher pitch for dramatic effect
               bearing: 30,
               duration: 3000,
               essential: true
@@ -171,7 +192,7 @@ export default function MapboxMap({
       map.current.flyTo({
         center: [destination.lng, destination.lat],
         zoom: 13,
-        pitch: 60,
+        pitch: 75, // Increased pitch for better 3D view
         bearing: Math.random() * 60 - 30, // Random bearing between -30 and 30 degrees
         duration: 2000,
         essential: true

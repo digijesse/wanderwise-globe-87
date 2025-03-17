@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Map } from "lucide-react";
 import MapboxMap from "@/components/MapboxMap";
 import { useState } from "react";
+import { WorldMap } from "@/components/ui/world-map";
 import { 
   Carousel,
   CarouselContent,
@@ -26,6 +27,20 @@ export default function TripItinerary({ itinerary, onBack }: TripItineraryProps)
     setSelectedDestination(index);
   };
 
+  // Prepare data for the WorldMap
+  const mapDots = itinerary.destinations.reduce((acc, curr, idx, arr) => {
+    if (idx < arr.length - 1) {
+      acc.push({
+        start: { lat: curr.lat, lng: curr.lng, label: curr.name },
+        end: { lat: arr[idx + 1].lat, lng: arr[idx + 1].lng, label: arr[idx + 1].name }
+      });
+    }
+    return acc;
+  }, [] as Array<{
+    start: { lat: number; lng: number; label?: string };
+    end: { lat: number; lng: number; label?: string };
+  }>);
+
   return (
     <motion.div 
       className="w-full h-full flex flex-col space-y-6 p-4"
@@ -34,6 +49,11 @@ export default function TripItinerary({ itinerary, onBack }: TripItineraryProps)
       exit={{ opacity: 0 }}
       transition={{ duration: 0.4 }}
     >
+      {/* Background World Map */}
+      <div className="absolute inset-0 -z-10 opacity-20 pointer-events-none overflow-hidden">
+        <WorldMap dots={mapDots} lineColor="#0ea5e9" />
+      </div>
+
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <Button
@@ -60,7 +80,7 @@ export default function TripItinerary({ itinerary, onBack }: TripItineraryProps)
           />
         </Card>
         
-        <p className="text-sm text-muted-foreground px-1">{itinerary.summary}</p>
+        <p className="text-sm text-muted-foreground px-1 bg-background/80 backdrop-blur-sm p-2 rounded-lg">{itinerary.summary}</p>
         
         {/* Horizontal Timeline */}
         <div className="w-full">
@@ -113,7 +133,7 @@ export default function TripItinerary({ itinerary, onBack }: TripItineraryProps)
         </div>
         
         {/* Selected Destination Details */}
-        <Card className="p-4 border border-border/50">
+        <Card className="p-4 border border-border/50 bg-background/80 backdrop-blur-sm">
           <div className="flex flex-col space-y-2">
             <h3 className="text-lg font-medium">{itinerary.destinations[selectedDestination].name}</h3>
             <p className="text-sm text-muted-foreground">

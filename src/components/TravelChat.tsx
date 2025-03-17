@@ -86,6 +86,7 @@ export default function TravelChat({ className, onItineraryGenerated }: TravelCh
   const [loading, setLoading] = useState(false);
   const [showButton, setShowButton] = useState(false);
   const [quickReplies, setQuickReplies] = useState<typeof quickRepliesMap.initial>(quickRepliesMap.initial);
+  const [zoomingToMap, setZoomingToMap] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -163,11 +164,47 @@ export default function TravelChat({ className, onItineraryGenerated }: TravelCh
   };
 
   const handleViewTrip = () => {
-    onItineraryGenerated(MOCK_ITINERARY);
+    // Start zoom animation
+    setZoomingToMap(true);
+    
+    // Wait for animation to complete before showing itinerary
+    setTimeout(() => {
+      onItineraryGenerated(MOCK_ITINERARY);
+    }, 2000); // Match this with the duration of the zoom animation
   };
 
   return (
     <div className={cn("flex flex-col h-full w-full relative", className)}>
+      {/* Zoom overlay for transition animation */}
+      <AnimatePresence>
+        {zoomingToMap && (
+          <motion.div 
+            className="absolute inset-0 z-50 bg-black/10 backdrop-blur-sm flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <motion.div 
+              className="w-[300px] h-[300px] rounded-full bg-primary/20 flex items-center justify-center"
+              initial={{ scale: 1 }}
+              animate={{ scale: 20 }}
+              transition={{ 
+                duration: 2, 
+                ease: [0.16, 1, 0.3, 1] // Custom easing for a nice zoom effect
+              }}
+            >
+              <motion.div 
+                className="w-[150px] h-[150px] rounded-full bg-primary/30"
+                initial={{ scale: 1 }}
+                animate={{ scale: 0 }}
+                transition={{ duration: 1.5, delay: 0.5 }}
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message, index) => (
           <ChatBubble 
@@ -228,6 +265,7 @@ export default function TravelChat({ className, onItineraryGenerated }: TravelCh
             <Button 
               onClick={handleViewTrip}
               className="bg-primary/90 hover:bg-primary text-white rounded-full px-8 py-6 shadow-lg backdrop-blur-sm transition-all hover:shadow-xl"
+              disabled={zoomingToMap}
             >
               View My Trip
             </Button>
@@ -247,7 +285,7 @@ export default function TravelChat({ className, onItineraryGenerated }: TravelCh
           />
           <Button 
             onClick={() => handleSendMessage()} 
-            disabled={!input.trim()} 
+            disabled={!input.trim() || zoomingToMap} 
             size="icon"
             className="bg-primary text-white hover:bg-primary/90"
           >
