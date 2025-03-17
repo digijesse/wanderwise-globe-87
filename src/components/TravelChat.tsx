@@ -235,7 +235,7 @@ export default function TravelChat({ className, onItineraryGenerated }: TravelCh
         )}
       </AnimatePresence>
       
-      <div className="p-4 border-t bg-background/80 backdrop-blur-sm">
+      <div className="p-4 border-t bg-background/80 backdrop-blur-sm sticky bottom-0">
         <div className="flex space-x-2">
           <Input
             ref={inputRef}
